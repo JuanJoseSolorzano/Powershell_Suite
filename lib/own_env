@@ -1,0 +1,158 @@
+# -*- coding: utf-8 -*-
+"""
+This module indicates the working path to be used with the VS Code program.
+**********************************************************************************
+@Autor: Juan Jose Solorzano (iuv06924)
+**********************************************************************************
+"""
+# import the time module
+from __future__ import print_function
+import time
+import sys
+import os
+
+#----- constants ----#
+SUITE_DIRS= '\\work\\ta\\'
+WORK_DIR = os.getcwd()
+
+def __get_root__():
+    global WORK_DIR
+    global SUITE_DIRS
+    return WORK_DIR.split(SUITE_DIRS)[0]
+
+def __get_name__():
+    global WORK_DIR
+    global SUITE_DIRS
+    root_suite_path =  __get_root__()
+    return root_suite_path.split('\\')[-1:][0] #get the last folder name in the work directory.
+
+def __change_line__(file_path,str_to_find,str_to_change):
+    f = open(file_path,'r') # Open the file in read mode.
+    dataList = []
+    #------- Find the string indicating --------#
+    for line in f.readlines():
+        if str_to_find in line:
+            dataList.append(str_to_change)
+        else: 
+            dataList.append(line)
+    f.close()
+    fi = open(file_path,'w')
+    #----- Re-write the file -----#
+    for line in dataList:
+        fi.write(line)
+    fi.close()
+
+def get_ta_suite_name(work_path = None):
+    global WORK_DIR
+    global SUITE_DIRS
+    name = None
+    if work_path:
+        WORK_DIR = work_path
+
+    if SUITE_DIRS in WORK_DIR:
+        name = __get_name__()
+    elif WORK_DIR.__contains__('work'):
+        work_subfolder = WORK_DIR.split('\\')[-1:][0]
+        if work_subfolder == 'ta':
+            WORK_DIR = WORK_DIR + '\\'
+        else:
+            WORK_DIR = WORK_DIR.replace('\\work','')
+            WORK_DIR = WORK_DIR + SUITE_DIRS
+        name = __get_name__()
+    elif 'work' in os.listdir(WORK_DIR):
+        name = WORK_DIR.split('\\')[-1:][0] #get the last folder name in the work directory.
+        
+    return name
+
+def get_modules_path(work_dir):
+    suite_pypath = []
+    for path, _, _ in os.walk(work_dir):
+        suite_pypath.append(path)
+    return suite_pypath
+
+def set_modules_path(lst_modules):
+    """
+    @public function: sets all modules found in the .vs_workspace file.
+    @final_modules: contains the path to all modules in the .vs_workspace file.   
+    """
+    for module in lst_modules:
+        sys.path.append(module)
+
+def timer(_time_,units='sec'):
+    div = 60
+    if units == 'min':
+        _time_ = 60*_time_
+    _time_ = int(_time_)
+    while _time_:
+        mins, secs = divmod(_time_, div)
+        timer = '{:02d}:{:02d}'.format(mins, secs)
+        print(timer, end="\r")
+        time.sleep(1)
+        _time_ -= 1
+    print('\n')
+
+def set_usr_conf():
+    work_folder = __get_name__()
+    sys.ps1 = "[{}](py{})-> ".format(work_folder,str(sys.version.split(' (')[0])[:1])
+
+def __start__(root=None):
+    name = get_ta_suite_name(root)
+    if name:
+        root = __get_root__()
+        print("User environment: <{}>".format(name))
+    if root != None:   
+        modules_path = get_modules_path(root)
+        set_modules_path(modules_path)
+        if not name:
+            print(65*'*')
+            print('[+] New python environment')
+            print(65*'*')
+    set_usr_conf()
+
+def start():
+    try:
+       from taf_init_paths import findProjectPath
+       current_work_dir = os.getcwd()
+       findProjectPath(current_work_dir) 
+       set_usr_conf()
+       try:
+        from taf_checksum import ConsistencyChecker
+        print("Version: %s"%ConsistencyChecker.getVersion())
+       except:
+        pass
+    except:
+        print("[!] Your Python installation does not have ConTest.")
+        print(">> Initializating modules using __start__ function.")
+        __start__()
+
+# Auto start when import 
+start()
+
+def cls():
+    """
+    @Clear the console
+    """
+    os.system('cls')
+
+def get_code(script=''):
+    """
+    Summary: Execute a script within a python session.
+    Args:
+        script (str, optional): The name of the script to execute. Defaults to ''.
+    Raises:
+        NameError: If 
+    """
+    if script != '':
+        with open(script, 'r') as file:
+            code = file.read()
+        return code
+    else:
+        raise NameError('[!] Script name was not given.')
+
+def ls(dir='.'):
+    curr_dir=os.listdir(dir)
+    for i in curr_dir:
+        print(i)
+
+def cd(dir='.'):
+    os.chdir(dir)

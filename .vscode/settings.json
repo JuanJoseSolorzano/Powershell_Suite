@@ -1,0 +1,14 @@
+{
+ "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+        "source": "PowerShell",
+        "icon": "terminal-powershell"
+    },
+    "Custom PowerShell": {
+        "path": "C:\\LegacyApp\\PowerShell\\pwsh.exe",
+        "args": [],
+        "icon": "terminal-powershell"
+    }
+    // ... other profiles
+}
+}
