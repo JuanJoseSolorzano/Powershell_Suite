@@ -325,7 +325,7 @@
             },
             {
                 "colorScheme": "My colors",
-                "commandline": "C:\\LegacyApp\\PowerShell\\pwsh.exe",
+                "commandline": "C:\\LegacyApp\\powershell\\pwsh.exe",
                 "font": 
                 {
                     "face": "Lilex Nerd Font",
