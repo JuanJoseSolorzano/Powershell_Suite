@@ -30,6 +30,7 @@ Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Key Shift+Tab -Function MenuComplete
 # Alias
 Set-Alias sargs ForEach-Object
+Write-Host "You'll be HACKED ... 💀" # Joke
 #--------- MAIN FUNCTION <prompt> -----------#
 function prompt {
 	<#
