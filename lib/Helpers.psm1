@@ -21,9 +21,10 @@ $MAGENTA = "`e[38;5;13m"
 $CYAN = "`e[36m"
 $WHITE = "`e[37m"
 $HELP = "${YELLOW}[?] Usage:`n    ${GREEN}PS> {0}${MAGENTA} {1}${RESET}"
+$POWERSHELL = "\PowerShell\"
 
 function temp {
-	cd "C:\Users\uiv06924\temp"
+	cd "$($home)\temp"
 }
 function BinToDec{
 	param($value,[switch]$ToHex)
@@ -83,7 +84,7 @@ function Sum-Num {
 function net {
     [CmdletBinding()]
     $command = $args
-    $process = Start-Process -NoNewWindow -File C:\LegacyApp\dotnet\dotnet.exe -ArgumentList $command -PassThru -Wait
+    $process = Start-Process -NoNewWindow -File C:\LegacyApp\dotnet8\dotnet.exe -ArgumentList $command -PassThru -Wait
     # Wait for the process to complete
     $process.WaitForExit()
     # Check the exit code
@@ -126,10 +127,10 @@ function del-pyc {
 function bat{
   param([string]$file,[string]$l)
   if($l){
-      C:/LegacyApp/Python36/python.exe $home/Documents/PowerShell/lib/bat.py $file $l
+      C:/LegacyApp/Python39/python.exe $home/PowerShell/lib/bat.py $file $l
   }
   else{
-      C:/LegacyApp/Python36/python.exe $home/Documents/PowerShell/lib/bat.py $file
+      C:/LegacyApp/Python39/python.exe $home/PowerShell/lib/bat.py $file
   }
 }
 
@@ -141,25 +142,39 @@ function rec2json {
 		[switch]$show
 	)
 	if($plot -And $show){
-		C:\LegacyApp\Python36\py3.exe C:\Users\uiv06924\rec2json.py $file --plot --show
+		C:\LegacyApp\Python39\python3.exe $home\rec2json.py $file --plot --show
 	}
 	elseif($show){
 		echo "show"
-		C:\LegacyApp\Python36\py3.exe C:\Users\uiv06924\rec2json.py $file --show
+		C:\LegacyApp\Python39\python3.exe $home\rec2json.py $file --show
 	}
 	elseif($plot){
-		C:\LegacyApp\Python36\py3.exe C:\Users\uiv06924\rec2json.py $file --plot
+		C:\LegacyApp\Python39\python3.exe $home\rec2json.py $file --plot
 	}
 	else{
-		C:\LegacyApp\Python36\py3.exe C:\Users\uiv06924\rec2json.py $file
+		C:\LegacyApp\Python39\python3.exe $home\rec2json.py $file
 	}
 }
 
 function juso {
-	return '\\vt1.vitesco.com\loc\abh5\didf2412\P_H02\user\JuSo'
+	[CmdletBinding()]
+	param([switch]$go)
+	$path = '\\vt1.vitesco.com\loc\abh5\didf2412\P_H02\user\JuSo'
+	if($go){
+		set-location $path
+	}else{
+		return $path
+	}
 }
 function profile{
-	return 'C:\Users\uiv06924\documents\WindowsPowerShell'
+	[CmdletBinding()]
+	param([switch]$go)
+	$path = "$($home)\PowerShell"
+	if($go){
+		set-location $path	
+	}else{
+	return $path
+	}
 }
 
 function del-recurse($item){
@@ -168,9 +183,6 @@ function del-recurse($item){
     Clear-Host
 }
 
-function goprofile {
-	set-location 'C:\Users\uiv06924\Documents\WindowsPowerShell\'
-}
 function rm-readonly{
     Set-ItemProperty -Path "." -Name Attributes -Value ((Get-Item ".").Attributes -band -not [System.IO.FileAttributes]::ReadOnly)
 }
@@ -186,9 +198,6 @@ function bash {
 }
 function onedrive {
 	Set-Location 'C:\Users\uiv06924\OneDrive - Vitesco Technologies'
-}
-function frepo{
-	set-location "C:\Users\uids7040\git"
 }
 
 function Edge($page) {
@@ -386,98 +395,70 @@ function edit-globals {
 
 function prj{
 	[CmdletBinding()]
-    param([string]$name,[string]$l30,[string]$l40,[switch]$g)
+    param([string]$name,[string]$opt,[switch]$go)
 	$p_ta3 = "d:/p_ta3"
     $bms_suite = "vt.prj.ford.foh02.sys_test"
-    function showDirOptions($directories) {
+    function showDirOptions($directories,$opt) {
         Write-Host "${YELLOW}[!] ${CYAN}The project name given has multiple locations."
             $idx = 0
             foreach($location in $directories){
-                $idx++
                 Write-Host "  ${MAGENTA}[$idx] ${GREEN}$location"
+                $idx++
             }
             $usr_selection = Read-Host "${YELLOW}[?]${CYAN} Which folder?${RESET}"
-			echo "The user selection is: $usr_selection"
-		    if($directories[$usr_selection-1]){
-                $dir = $directories[$user_selection-1]
-                if($g){
+			$selection = [int]$usr_selection
+		    if($directories){
+                $dir = $directories.Item($selection)
+				if($opt -eq "ls"){
+					ls $dir
+					return
+				}
+                if($go){
                     set-location (Get-ChildItem -Path $dir | Where-Object { $_.PSIsContainer -and $_.Name -eq "$bms_suite" }).FullName
                 }
                 else{
-                    set-location $directories[$user_selection-1]
+                    set-location $dir
                 }
             }
     }
-    if($l30){
+    if($name -eq "l30"){
         $l30_path = "$p_ta3/FORD/BMS/H02/L30"
-		if($l30 -eq "ls"){
+		if($opt -eq "ls"){
 			ls "$l30_path"
-		}
-		else{
-        	$dir_match = $(Get-ChildItem -Recurse -Force -Path $l30_path -Filter "$l30" | Where-Object {$_.PSIsContainer}).FullName
-        	if($dir_match){
-        	    if($dir_match.GetType().BaseType.Name -eq "Array"){
-        	        showDirOptions $dir_match
-        	    }else{
-        	        if($g){
-        	            set-location (Get-ChildItem -Path $dir_match | Where-Object { $_.PSIsContainer -and $_.Name -eq "$bms_suite" }).FullName
-        	        }
-        	        else{
-        	            set-location $dir_match
-        	        }
-        	    }
-        	}else {
-        	    Write-Host "${RED}[!] >> Directory not found. ${CYAN}'[$l30]'${RESET}"
-        	}
-		}
-    }elseif ($l40) {
-        $l40_path = "$p_ta3/FORD/BMS/H02/L40"
-		if($l40 -eq "ls"){
-			ls "$l40_path"
+			return
 		}else{
-        	$dir_match = $(Get-ChildItem -Recurse -Force -Path $l40_path -Filter "$l40" | Where-Object {$_.PSIsContainer}).FullName
-        	if($dir_match){
-        	    if($dir_match.GetType().BaseType.Name -eq "Array"){
-        	        showDirOptions $dir_match
-        	    }else{
-        	        if($g){
-        	            set-location (Get-ChildItem -Path $dir_match | Where-Object { $_.PSIsContainer -and $_.Name -eq "$bms_suite" }).FullName
-        	        }
-        	        else{
-        	            set-location $dir_match
-        	        }
-        	    }
-        	}else {
-        	    Write-Host "${RED}[!] >> Directory not found. ${CYAN}'[$l40]'${RESET}"
-        	}
-		}
-    }elseif ($name) {
-		if($name -eq "l30"){
-			Set-Location "D:\p_ta3\FORD\BMS\H02\L30"
+			set-location $l30_path
 			return
 		}
-		elseif($name -eq "l40") {
-			Set-Location "D:\p_ta3\FORD\BMS\H02\L40"
+    }elseif($name -eq "l40"){
+        $l40_path = "$p_ta3/FORD/BMS/H02/L40"
+		if($opt -eq "ls"){
+			ls "$l40_path"
+			return
+		}else{
+			set-location $l40_path
 			return
 		}
-		else{
+	}elseif($name){
         	$dir_match = $(Get-ChildItem -Recurse -Force -Path $p_ta3 -Filter "$name" | Where-Object {$_.PSIsContainer}).FullName
         	if($dir_match){
         	    if($dir_match.GetType().BaseType.Name -eq "Array"){
-        	        showDirOptions $dir_match
+        	        showDirOptions $dir_match $opt
         	    }else{
         	        if($g){
         	            set-location (Get-ChildItem -Path $dir_match | Where-Object { $_.PSIsContainer -and $_.Name -eq "$bms_suite" }).FullName
         	        }
+					elseif($opt -eq "ls"){
+						ls $dir_match
+					}
         	        else{
         	            set-location $dir_match
         	        }
         	    }
         	}else {
-        	    Write-Host "${RED}[!] >> Directory not found. ${CYAN}'/$name/'${RESET}"
+        	    Write-Host "${RED}[!] >> Directory not found. ${CYAN}'$p_ta3/$name/'${RESET}"
         	}
-		}
-    }else{
+		}else{
         Write-Host "$($HELP -f 'prj','[-name<default>] [-L30<opt>] [-L40<opt>]')"
     }
 }
@@ -884,7 +865,6 @@ function cpright {
     param([string]$file)
 	$docstring = '# -*- coding: UTF-8 -*-
 # ************************************************************************************************************#
-# COPYRIGHT (C) Vitesco Technologies                                                                          #
 # ALL RIGHTS RESERVED.                                                                                        #
 #                                                                                                             #
 # The reproduction, transmission or use of this document or its                                               #
@@ -914,6 +894,7 @@ function cpright {
 		$file_path = whereis $file -nV
 		Insert-line $file_path "#{cpright}#" $docstring
 	}else{
-		Write-Host "[!] A file name is required."
+		set-Clipboard $docstring
+		Write-Host $docstring
 	}
 }
