@@ -23,6 +23,95 @@ $WHITE = "`e[37m"
 $HELP = "${YELLOW}[?] Usage:`n    ${GREEN}PS> {0}${MAGENTA} {1}${RESET}"
 $POWERSHELL = "\PowerShell\"
 
+function Log-Work {
+	[CmdletBinding()]
+	param([string]$title,[string]$start,[string]$end,[string]$note)
+	try {
+	    $outlook = New-Object -ComObject Outlook.Application
+	} catch {
+	    Write-Host "Error: Unable to start Outlook. Ensure it is installed."
+		return
+	}
+	if(-not $start.Contains(":")){
+		$start = "$start"+":00"
+	}
+	if(-not $end.Contains(":")){
+		$end = "$end"+":00"
+	}
+	$date = Get-Date
+	$start_date = Get-Date "$($date.Year)-$($date.Month.ToString("00"))-$($date.Day.ToString("00")) $start"
+	$end_date = Get-Date "$($date.Year)-$($date.Month.ToString("00"))-$($date.Day.ToString("00")) $end"
+	# Create a new appointment item
+	$appointment = $outlook.CreateItem(1) # 1 indicates an AppointmentItem
+	# Set the appointment properties
+	$appointment.Subject = "$title"
+	$appointment.Body = "NOTES: $note"   
+	$appointment.Start = $start_date
+	$appointment.End = $end_date
+	$appointment.ReminderSet = $false                                             
+	#$appointment.ReminderMinutesBeforeStart = 15                                     
+	$appointment.Save()
+	$appointment = $null
+	# Optionally, you can quit Outlook if you opened it
+	# $outlook.Quit()  # Uncomment to close Outlook
+	$outlook = $null
+	Write-Host ">> Work Logged"
+}
+
+function Get-Logwork {
+	[CmdletBinding()]
+	param([string]$date,[switch]$h)
+	if($h){
+		Write-Host "> Get-Logwork -date '2023-10-25'"
+		return
+	}
+	if(-not $date){
+		$date=Get-Date
+	}
+	write-host "===================================================================="
+	write-host "  		  TIME WORKED"
+	write-host "===================================================================="
+	# Create an Outlook Application COM object
+	$outlook = New-Object -ComObject Outlook.Application
+	$namespace = $outlook.GetNamespace("MAPI")
+	$calendarFolder = $namespace.GetDefaultFolder(9) # 9 corresponds to olFolderCalendar
+	$specificDate = Get-Date $date # Change this to your desired date
+	$start = $specificDate.Date
+	$end = $specificDate.Date.AddDays(1)
+	$calendarItems = $calendarFolder.Items
+	$calendarItems.Sort("[Start]")
+	$calendarItems.IncludeRecurrences = $true
+	$results = @()  # Initialize as an empty array
+	$totalDuration = [System.TimeSpan]::Zero
+	$filter = "[Start] >= '" + $start.ToString("g") + "' AND [Start] < '" + $end.ToString("g") + "'"
+	$filteredItems = $calendarItems.Restrict($filter)
+	# Iterate through filtered appointments and output details
+	foreach ($item in $filteredItems) {
+		if($item.Subject.Contains("[")){
+	    	$duration = $item.End - $item.Start
+			$totalDuration += $duration
+			$result = [PSCustomObject]@{
+            Subject  = $item.Subject
+            Duration = $duration
+			Note = $item.Body}
+        	$results += $result
+		}
+	}
+	$sortedResults = $results | Sort-Object {
+    	if ($_.Subject -like "*[BMS]*") { 0 }
+    	elseif ($_.Subject -like "*[ECU]*") { 1 }
+    	else { 2 }
+	}, { $_.Subject }  # Optionally sort alphabetically within groups
+
+	if ($sortedResults.Count -gt 0) {
+	    $sortedResults | Format-Table -AutoSize
+		Write-Host " Total: $totalDuration"
+	} else {
+	    Write-Output "No appointments found with the specified criteria."
+	}
+	write-host "===================================================================="
+}
+
 function temp {
 	cd "$($home)\temp"
 }

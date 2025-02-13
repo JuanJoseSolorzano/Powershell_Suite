@@ -28,9 +28,6 @@ Set-Location $exe_path
 # Shows the directories options.
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Key Shift+Tab -Function MenuComplete
-# Alias
-Set-Alias sargs ForEach-Object
-Write-Host "💀 All Is Set 💀"
 #--------- MAIN FUNCTION <prompt> -----------#
 function prompt {
 	<#
