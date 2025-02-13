@@ -45,7 +45,7 @@ function Set-Logwork {
 	$appointment = $outlook.CreateItem(1) # 1 indicates an AppointmentItem
 	# Set the appointment properties
 	$appointment.Subject = "$title"
-	$appointment.Body = "NOTES: $note"   
+	$appointment.Body = "NOTES: `n$note"   
 	$appointment.Start = $start_date
 	$appointment.End = $end_date
 	$appointment.ReminderSet = $false                                             
