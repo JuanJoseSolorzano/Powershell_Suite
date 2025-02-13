@@ -23,7 +23,7 @@ $WHITE = "`e[37m"
 $HELP = "${YELLOW}[?] Usage:`n    ${GREEN}PS> {0}${MAGENTA} {1}${RESET}"
 $POWERSHELL = "\PowerShell\"
 
-function Log-Work {
+function Set-Logwork {
 	[CmdletBinding()]
 	param([string]$title,[string]$start,[string]$end,[string]$note)
 	try {
