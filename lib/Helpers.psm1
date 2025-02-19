@@ -85,10 +85,17 @@ function Get-Logwork {
 	$totalDuration = [System.TimeSpan]::Zero
 	$filter = "[Start] >= '" + $start.ToString("g") + "' AND [Start] < '" + $end.ToString("g") + "'"
 	$filteredItems = $calendarItems.Restrict($filter)
+	$bms_time = 0
+	$ecu_time = 0
 	# Iterate through filtered appointments and output details
 	foreach ($item in $filteredItems) {
-		if($item.Subject.Contains("[")){
+		if($item.Subject.Contains("[BMS]") -or $item.Subject.Contains("[ECU]")){
 	    	$duration = $item.End - $item.Start
+			if($item.Subject.Contains("[BMS]")){
+				$bms_time += $duration
+			}elseif($item.Subject.Contains("[ECU]")){
+				$ecu_time += $duration
+			}
 			$totalDuration += $duration
 			$result = [PSCustomObject]@{
             Subject  = $item.Subject
@@ -105,6 +112,8 @@ function Get-Logwork {
 
 	if ($sortedResults.Count -gt 0) {
 	    $sortedResults | Format-Table -AutoSize
+		Write-Host " BMS: $bms_time"
+		Write-Host " ECU: $ecu_time"
 		Write-Host " Total: $totalDuration"
 	} else {
 	    Write-Output "No appointments found with the specified criteria."
