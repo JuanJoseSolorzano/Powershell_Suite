@@ -23,6 +23,86 @@ $WHITE = "`e[37m"
 $HELP = "${YELLOW}[?] Usage:`n    ${GREEN}PS> {0}${MAGENTA} {1}${RESET}"
 $POWERSHELL = "\PowerShell\"
 
+function notes{
+<#
+.SYNOPSIS
+	Creates notes to organize your thought
+.DESCRIPTION
+    Any
+.NOTES
+    Usages:
+        $> notes -prj [fc1,l30,g80...]
+        $> notes -get -prj [fc1,l30...] -date 12-05-2025
+#>
+    [CmdletBinding()]
+    param([string]$data,
+          [string]$date,
+          [switch]$open,
+          [string]$go,
+          [switch]$ls,
+          [string]$get,
+          [switch]$b,
+          [string]$prj)
+    $availableProjects = @("fc1","fb0","l30","l40","g70","g80","general")
+    $notesPath = "C:\Users\uiv06924\OneDrive - Vitesco Technologies\mynotes\"
+    function help {Write-Host "$> notes -prj [$availableProjects]"}
+    $currLocation = (Get-Location).Path
+    if($go){
+		if($go -eq "."){set-location $notesPath}
+		else{Set-Location $notesPath$go}
+		return
+	}
+    elseif(-not $prj -and -not $get) {help; return}
+    if($prj -and -not $get){
+        $prj = $prj.ToLower()
+        # WRITE NOTES
+        if($availableProjects.Contains($prj)){
+            if ($ls){Get-ChildItem "$notesPath$prj";return}
+            Set-Location "$notesPath$prj"
+            $currentDate = (Get-Date -Format "dd_MM_yyyy").ToString()
+            $dayNote = $currentDate+".txt"
+            if(Test-Path $dayNote){
+                nvim $dayNote
+            }else{
+                New-Item -ItemType file -Name $dayNote
+                nvim $dayNote
+            }
+        }else{Write-Host "Project `"$prj`" not found."}
+    }
+    # GET NOTES DATA
+    elseif($get){
+        Set-Location "$notesPath$get"
+        if($date){
+            $dayFormated = $("$date-$(get-date -Format "yyyy")").ToString().Replace("-","_")
+            $dateNote=$dayFormated+".txt"
+            if(Test-Path $dateNote){
+                if($b){bat $dateNote}else{cat $dateNote}
+            }else{Write-Host "No date note found."}
+        }else{
+            $currentDate = (Get-Date -Format "dd_MM_yyyy").ToString()+".txt"
+            if(Test-Path $currentDate){
+                if($b){bat $currentDate}else{cat $currentDate}
+            }else{Write-Host "Nothing to read ..."}
+        }
+    }else{Write-Host "Project `"$prj`" not found."}
+    Set-Location $currLocation
+}
+
+function whatis {
+	[CmdletBinding()]
+	param([string]$word,[switch]$pronunce)
+	if(-not $word){Write-Host "Usage: `n>> whatis -word 'any' -pronunce[optional]";return}
+	$response = Invoke-WebRequest -Uri "https://api.dictionaryapi.dev/api/v2/entries/en/$word"
+	$meaning = ($response.Content | ConvertFrom-Json -Depth 1000).meanings
+	Write-Host $meaning.definitions.definition	
+	Write-Host "[?] Synonyms:"
+	Write-Host $meaning.synonyms
+	if($pronunce){
+		$phonetics = ($response.Content | ConvertFrom-Json -Depth 1000).phonetics
+		google $phonetics.audio.get(1)
+	}
+}
+
 function Set-Logwork {
 	[CmdletBinding()]
 	param([string]$title,[string]$start,[string]$end,[string]$note)
