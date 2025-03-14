@@ -23,20 +23,128 @@ $WHITE = "`e[37m"
 $HELP = "${YELLOW}[?] Usage:`n    ${GREEN}PS> {0}${MAGENTA} {1}${RESET}"
 $POWERSHELL = "\PowerShell\"
 
-function notes{
-<#
-.SYNOPSIS
-	Creates notes to organize your thought
-.DESCRIPTION
-    Any
-.NOTES
-    Usages:
-        $> notes -prj [fc1,l30,g80...]
-        $> notes -get -prj [fc1,l30...] -date 12-05-2025
-#>
+function Get-CpuUsage {
+  param([switch]$showProcess)
+  $usage=[math]::Round((Get-Counter '\Processor(_Total)\% Processor Time').CounterSamples.CookedValue,2)
+  $mem = Get-CimInstance Win32_OperatingSystem
+$memory = [math]::Round((($mem.TotalVisibleMemorySize - $mem.FreePhysicalMemory) / $mem.TotalVisibleMemorySize) * 100, 2)
+  Write-Host "======================================================="
+  Write-Host "          -       Cumputer Usage         -"
+  Write-Host "======================================================="
+  Write-Host "CPU: $usage%"
+  Write-Host "Memory: $memory%"
+  if($showProcess){
+    Get-CimInstance Win32_Process | 
+    Select-Object Name, @{Name="MemoryUsageMB"; Expression={[math]::Round($_.WorkingSetSize / 1MB, 2)}} |
+    Sort-Object MemoryUsageMB -Descending | Select-Object -First 15 Name, MemoryUsageMB
+  }
+}
+
+function RmProc {
+	param([string]$name)
+	if(-not $name){
+		Write-Host "[?] Usage:`n`t>> rmProc [process name]"
+		return
+	}
+	if($name.Contains('.')){
+		$name = $name.split('.')[0]
+	}
+	try {
+		kill -processName $name
+		Write-Host "[+] The process `"$name`" was removed."
+	}
+	catch {
+		Write-Host "[!] Error: $name is still running ..."
+	}
+}
+
+function mktemp {
+	[CmdletBinding()]
+	param([string]$name,[switch]$go)
+	$tmpPath = [System.IO.Path]::GetTempPath()
+	if(-not $name){
+		$tmpName="temp_folder"
+		Remove-Item -Force -Recurse -Path "$tmpPath\$tmpName" 2>$null
+	}
+	else{$tmpName = $name}
+	$rootTempPath = Join-Path $tmpPath $tmpName
+	New-Item -Path $rootTempPath -ItemType Directory > $null
+	write-host $rootTempPath
+	if($go){set-location $rootTempPath}
+}
+
+function set-note {
+	param([string]$head,[string]$note)
+	if(-not $head){
+		$head="[General]"
+	}
+	if($note){
+		$outlook = New-Object -ComObject Outlook.Application
+		$appointment = $outlook.CreateItem(1)
+		$appointment.Subject = "[NOTES]$head"
+		$appointment.Body = "$note"
+		$appointment.AllDayEvent = $true
+		$appointment.ReminderSet = $false
+		$appointment.Save()
+		$appointment = $null
+		$outlook = $null
+	}else{
+		Write-Host "[!] The content note is necessary."
+	}
+}
+
+function get-notes {
+	[CmdletBinding()]
+	param([string]$prj,[string]$date,[switch]$h)
+	$outlook = New-Object -ComObject Outlook.Application
+	$namespace = $outlook.GetNamespace("MAPI")
+	$calendarFolder = $namespace.GetDefaultFolder(9) # 9 corresponds to olFolderCalendar
+	if($h){
+		Write-Host "> Get-Logwork -date '2023-10-25'"
+		return
+	}
+	if(-not $date){
+		$date=Get-Date
+	}
+	$specificDate = Get-Date $date # Change this to your desired date
+	$start = $specificDate.Date
+	$end = $specificDate.Date.AddDays(1)
+	$calendarItems = $calendarFolder.Items
+	$calendarItems.Sort("[Start]")
+	$calendarItems.IncludeRecurrences = $true
+	# Create a filter to get appointments for the specific date
+	$filter = "[Start] >= '" + $start.ToString("g") + "' AND [Start] < '" + $end.ToString("g") + "'"
+	$filteredItems = $calendarItems.Restrict($filter)
+	# Initialize arrays to hold all-day and normal appointments
+	$allDayAppointments = @()
+	foreach($appointment in $filteredItems) {
+    	if ($appointment.AllDayEvent -eq $true) {
+        	$allDayAppointments += $appointment
+    	}
+	}
+	# return
+	if(-not $prj){
+		foreach ($appointment in $allDayAppointments) {
+	    	Write-Host "$($appointment.Subject)"
+			Write-Host "$($appointment.Body)"
+			Write-Host "-----"
+		}	
+	}else{
+		foreach($item in $allDayAppointments) {
+			if($item.Subject.Contains($prj.ToUpper())){
+				Write-Host "$($item.Subject)"
+				Write-Host "$($item.Body)"
+				Write-Host "`n"
+			}
+		}
+	}
+}
+
+function deprecated_notes{
     [CmdletBinding()]
     param([string]$data,
           [string]$date,
+		  [string]$grep,
           [switch]$open,
           [string]$go,
           [switch]$ls,
@@ -84,7 +192,11 @@ function notes{
                 if($b){bat $currentDate}else{cat $currentDate}
             }else{Write-Host "Nothing to read ..."}
         }
-    }else{Write-Host "Project `"$prj`" not found."}
+    }
+	elseif($grep){
+		
+	}
+	else{Write-Host "Project `"$prj`" not found."}
     Set-Location $currLocation
 }
 
@@ -169,7 +281,7 @@ function Get-Logwork {
 	$ecu_time = 0
 	# Iterate through filtered appointments and output details
 	foreach ($item in $filteredItems) {
-		if($item.Subject.Contains("[BMS]") -or $item.Subject.Contains("[ECU]")){
+		if($item.Subject.Contains("[BMS]") -or $item.Subject.Contains("[ECU]") -and -not $item.Subject.Contains("[NOTES]")){
 	    	$duration = $item.End - $item.Start
 			if($item.Subject.Contains("[BMS]")){
 				$bms_time += $duration
