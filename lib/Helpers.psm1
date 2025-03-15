@@ -81,7 +81,7 @@ function set-note {
 	if($note){
 		$outlook = New-Object -ComObject Outlook.Application
 		$appointment = $outlook.CreateItem(1)
-		$appointment.Subject = "[NOTES]$head"
+		$appointment.Subject = "[NOTES]$head".ToUpper()
 		$appointment.Body = "$note"
 		$appointment.AllDayEvent = $true
 		$appointment.ReminderSet = $false
@@ -95,7 +95,7 @@ function set-note {
 
 function get-notes {
 	[CmdletBinding()]
-	param([string]$prj,[string]$date,[switch]$h)
+	param([string]$prj,[string]$date,[switch]$today,[switch]$month,[switch]$h)
 	$outlook = New-Object -ComObject Outlook.Application
 	$namespace = $outlook.GetNamespace("MAPI")
 	$calendarFolder = $namespace.GetDefaultFolder(9) # 9 corresponds to olFolderCalendar
@@ -105,15 +105,30 @@ function get-notes {
 	}
 	if(-not $date){
 		$date=Get-Date
+		$specific_date=$false
+	}else{
+		$specific_date=$true
 	}
-	$specificDate = Get-Date $date # Change this to your desired date
-	$start = $specificDate.Date
-	$end = $specificDate.Date.AddDays(1)
 	$calendarItems = $calendarFolder.Items
 	$calendarItems.Sort("[Start]")
 	$calendarItems.IncludeRecurrences = $true
-	# Create a filter to get appointments for the specific date
-	$filter = "[Start] >= '" + $start.ToString("g") + "' AND [Start] < '" + $end.ToString("g") + "'"
+	if($month){
+		$monthStart = Get-Date -Year (Get-Date).Year -Month (Get-Date).Month -Day 1
+		$monthEnd = $monthStart.AddMonths(1)
+		# Create a filter to get appointments for the current month
+		$filter = "[Start] >= '" + $monthStart.ToString("g") + "' AND [Start] < '" + $monthEnd.ToString("g") + "'"
+	}
+	elseif($today){
+		$start = $date.Date
+		$end = $date.Date.AddDays(1)
+		# Create a filter to get appointments for the specific date
+		$filter = "[Start] >= '" + $start.ToString("g") + "' AND [Start] < '" + $end.ToString("g") + "'"
+	}else{
+		$yearStart = Get-Date -Year (Get-Date).Year -Month 1 -Day 1
+		$yearEnd = Get-Date -Year (Get-Date).Year -Month 12 -Day 31 -Hour 23 -Minute 59 -Second 5
+		# Create a filter to get appointments for the current year
+		$filter = "[Start] >= '" + $yearStart.ToString("g") + "' AND [Start] < '" + $yearEnd.ToString("g") + "'"
+	}
 	$filteredItems = $calendarItems.Restrict($filter)
 	# Initialize arrays to hold all-day and normal appointments
 	$allDayAppointments = @()
@@ -125,16 +140,36 @@ function get-notes {
 	# return
 	if(-not $prj){
 		foreach ($appointment in $allDayAppointments) {
-	    	Write-Host "$($appointment.Subject)"
-			Write-Host "$($appointment.Body)"
-			Write-Host "-----"
+			if($specific_date){
+				$event_date = Get-Date "$($appointment.Start.ToString().Split(" ").Get(0))"
+				$target_date = [datetime]::ParseExact($date, 'dd-MM-yyyy', $null)
+				if($event_date -eq $target_date){
+					Write-Host "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))"
+					Write-Host "$($appointment.Body)"
+					Write-Host "-----"
+				}
+			}else{
+				Write-Host "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))"
+				Write-Host "$($appointment.Body)"
+				Write-Host "-----"
+			}
 		}	
 	}else{
-		foreach($item in $allDayAppointments) {
-			if($item.Subject.Contains($prj.ToUpper())){
-				Write-Host "$($item.Subject)"
-				Write-Host "$($item.Body)"
-				Write-Host "`n"
+		foreach($appointment in $allDayAppointments) {
+			if($appointment.Subject.Contains($prj.ToUpper())){
+				if($specific_date){
+					$event_date = Get-Date "$($appointment.Start.ToString().Split(" ").Get(0))"
+					$target_date = [datetime]::ParseExact($date, 'dd-MM-yyyy', $null)
+					if($event_date -eq $target_date){
+						Write-Host "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))"
+						Write-Host "$($appointment.Body)"
+						Write-Host "`n"
+					}
+				}else{
+					Write-Host "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))"
+					Write-Host "$($appointment.Body)"
+					Write-Host "`n"
+				}
 			}
 		}
 	}
