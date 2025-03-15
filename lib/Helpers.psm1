@@ -60,7 +60,7 @@ function RmProc {
 
 function mktemp {
 	[CmdletBinding()]
-	param([string]$name,[switch]$go)
+	param([string]$name,[switch]$go,[switch]$file)
 	$tmpPath = [System.IO.Path]::GetTempPath()
 	if(-not $name){
 		$tmpName="temp_folder"
@@ -69,14 +69,25 @@ function mktemp {
 	else{$tmpName = $name}
 	$rootTempPath = Join-Path $tmpPath $tmpName
 	New-Item -Path $rootTempPath -ItemType Directory > $null
-	write-host $rootTempPath
+	if($file){
+		$fName="$(Get-Random)"
+		New-Item -ItemType file -Name $fName -Path $rootTempPath 1>$null
+		return "$rootTempPath\$fName"
+	}else{
+		return $rootTempPath
+	}
 	if($go){set-location $rootTempPath}
 }
 
 function set-note {
-	param([string]$head,[string]$note)
+	param([string]$head,[string]$note,[switch]$nvim)
 	if(-not $head){
 		$head="[General]"
+	}
+	if($nvim){
+		$path = mktemp -file
+		nvim "$path"
+		$note = cat "$path"
 	}
 	if($note){
 		$outlook = New-Object -ComObject Outlook.Application
