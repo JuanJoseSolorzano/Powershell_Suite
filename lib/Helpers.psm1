@@ -138,20 +138,21 @@ function get-notes {
     	}
 	}
 	# return
+	$ret = ""
 	if(-not $prj){
 		foreach ($appointment in $allDayAppointments) {
 			if($specific_date){
 				$event_date = Get-Date "$($appointment.Start.ToString().Split(" ").Get(0))"
 				$target_date = [datetime]::ParseExact($date, 'dd-MM-yyyy', $null)
 				if($event_date -eq $target_date){
-					Write-Host "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))"
-					Write-Host "$($appointment.Body)"
-					Write-Host "-----"
+					$ret += "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))`n"
+					$ret += "$($appointment.Body)`n"
+					$ret += "---------------------------------`n"
 				}
 			}else{
-				Write-Host "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))"
-				Write-Host "$($appointment.Body)"
-				Write-Host "-----"
+				$ret += "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))`n"
+				$ret += "$($appointment.Body)`n"
+				$ret += "---------------------------------`n"
 			}
 		}	
 	}else{
@@ -161,18 +162,19 @@ function get-notes {
 					$event_date = Get-Date "$($appointment.Start.ToString().Split(" ").Get(0))"
 					$target_date = [datetime]::ParseExact($date, 'dd-MM-yyyy', $null)
 					if($event_date -eq $target_date){
-						Write-Host "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))"
-						Write-Host "$($appointment.Body)"
-						Write-Host "`n"
+						$ret += "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))`n"
+						$ret += "$($appointment.Body)`n"
+						$ret += "---------------------------------`n"
 					}
 				}else{
-					Write-Host "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))"
-					Write-Host "$($appointment.Body)"
-					Write-Host "`n"
+					$ret += "$($appointment.Subject) - $($appointment.Start.ToString().Split(" ").Get(0))`n"
+					$ret += "$($appointment.Body)`n"
+					$ret += "---------------------------------`n"
 				}
 			}
 		}
 	}
+	return $ret
 }
 
 function deprecated_notes{
