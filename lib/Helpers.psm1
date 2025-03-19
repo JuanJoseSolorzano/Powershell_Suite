@@ -130,10 +130,12 @@ function get-notes {
 		$filter = "[Start] >= '" + $monthStart.ToString("g") + "' AND [Start] < '" + $monthEnd.ToString("g") + "'"
 	}
 	elseif($today){
-		$start = $date.Date
-		$end = $date.Date.AddDays(1)
+		$dayStart = Get-Date -Year (Get-Date).Year -Month (Get-Date).Month -Day (Get-Date).Day -Hour 00 -Minute 00 -Second 5
+		$dayEnd = Get-Date -Year (Get-Date).Year -Month (Get-Date).Month -Day (Get-Date).Day -Hour 23 -Minute 59 -Second 5
+		write-host "TODAY: $dayStart"
+		write-host "end: $dayEnd"
 		# Create a filter to get appointments for the specific date
-		$filter = "[Start] >= '" + $start.ToString("g") + "' AND [Start] < '" + $end.ToString("g") + "'"
+		$filter = "[Start] >= '" + $dayStart.ToString("g") + "' AND [Start] < '" + $dayEnd.ToString("g") + "'"
 	}else{
 		$yearStart = Get-Date -Year (Get-Date).Year -Month 1 -Day 1
 		$yearEnd = Get-Date -Year (Get-Date).Year -Month 12 -Day 31 -Hour 23 -Minute 59 -Second 5
