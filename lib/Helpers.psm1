@@ -86,14 +86,14 @@ function set-note {
 	}
 	if($nvim){
 		$path = mktemp -file
-		nvim "$path"
-		$note = cat "$path"
+		nvim $path
+		$note = Get-Content -Delimiter "`n`t" $path
 	}
 	if($note){
 		$outlook = New-Object -ComObject Outlook.Application
 		$appointment = $outlook.CreateItem(1)
 		$appointment.Subject = "[NOTES]$head".ToUpper()
-		$appointment.Body = "$note"
+		$appointment.Body = $note
 		$appointment.AllDayEvent = $true
 		$appointment.ReminderSet = $false
 		$appointment.Save()
