@@ -19,7 +19,7 @@ $BLUE = "`e[34m"
 $MAGENTA = "`e[1;38;5;13m"
 $CYAN = "`e[36m"
 $WHITE = "`e[37m"
-Clear-Host # clear the console.1 
+Clear-Host # clear the console.
 # Import the necessary modules.
 $exe_path = Get-Location # get the current directory.
 Set-Location $HOME
@@ -33,17 +33,18 @@ $module_name = ($HOME + "\{0}.psm1" -f ".decode")
 $module_exists = [System.IO.File]::Exists($module_name)
 if($module_exists){Import-Module -Name $module_name -DisableNameChecking}
 Set-Location $exe_path # return to the current directory.
-## Shows the directories options.
+# Shows the directories options.
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Key Shift+Tab -Function MenuComplete
-#--------- MAIN FUNCTION <prompt> -----------#
+
+# Sets the main prompt in the terminal
 function prompt{
     $Host.UI.RawUI.WindowTitle = (Get-Location).Path
     Set-PSReadLineOption -Colors @{ Command = 'green' }
     Invoke-Starship
     # set icons in the terminal.
     $currentDir = (get-location).Path
-    if($HOME -eq $currentDir){
+    if($currentDir.Contains($HOME)){
         $currentDir = $currentDir.Replace($HOME, "🏠")
     }
     elseif($currentDir.Contains("D:\")) {
