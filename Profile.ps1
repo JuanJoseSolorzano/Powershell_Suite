@@ -1,5 +1,15 @@
 <#
-Module description: ----
+.SYNOPSIS
+    PowerShell profile script for setting up the environment and importing necessary modules.
+
+.DESCRIPTION
+    This script sets up the PowerShell environment by defining color variables, clearing the console,
+    importing necessary modules, and configuring the prompt and tab completion behavior.
+
+.NOTES
+    Author: Solorzano, Juan Jose.
+    Date: [2021-09-01]
+    Version: 3.1
 #>
 $RESET = "`e[0m"
 $RED = "`e[31m"
@@ -9,12 +19,10 @@ $BLUE = "`e[34m"
 $MAGENTA = "`e[1;38;5;13m"
 $CYAN = "`e[36m"
 $WHITE = "`e[37m"
-
-Clear-Host #clear the console every time when the script is called.
-#------ Importing PS1 Modules ------#
+Clear-Host # clear the console.1 
+#Importing PS1 Modules ------#
 $exe_path = Get-Location
 Set-Location $HOME
-#$root_path = Get-Location
 $modules_path = $HOME + '\\.powershellsuite\\powershell-master\\lib\\{0}.psm1'
 Import-Module -Name ($modules_path -f "GitComCom") -DisableNameChecking
 Import-Module -Name ($modules_path -f "Helpers") -DisableNameChecking
@@ -25,37 +33,34 @@ $module_name = ($HOME + "\{0}.psm1" -f ".decode")
 $module_exists = [System.IO.File]::Exists($module_name)
 if($module_exists){Import-Module -Name $module_name -DisableNameChecking}
 Set-Location $exe_path
-# Shows the directories options.
+## Shows the directories options.
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Key Shift+Tab -Function MenuComplete
 #--------- MAIN FUNCTION <prompt> -----------#
-function prompt {
-	<#
-		This function provides a new visualization of the PowerShell interface.
-	#>
-	$Host.UI.RawUI.WindowTitle = (Get-Location).Path
-	Set-PSReadLineOption -Colors @{ Command = 'green' }
-	$currentDir = (Convert-Path .)
-	#-------- Set same working path ------#
-	Invoke-Starship
-	#-------- Home Status --------#
-	if (($currentDir.Contains($HOME))) {
-		$currentDir = $currentDir.Replace($HOME, "🏚️")
-        if ($currentDir.Contains("temp")) {
-            $currentDir = $currentDir.Replace("temp"," ")
-        }
-	}
-    elseif ($currentDir.Contains("D:\")) {
-        $currentDir = $currentDir.Replace("D:\","📍\")
-        
+function prompt{
+    $Host.UI.RawUI.WindowTitle = (Get-Location).Path
+    Set-PSReadLineOption -Colors @{ Command = 'green' }
+    Invoke-Starship
+    # set icons in the terminal.
+    $currentDir = (get-location).Path
+    if($HOME -eq $currentDir){
+        $currentDir = $currentDir.Replace($HOME, "🏠")
     }
-    elseif ($currentDir.Contains("C:\")) {
+    elseif($currentDir.Contains("D:\")) {
+        $currentDir = $currentDir.Replace("D:\","📍\")
+    }
+    elseif($currentDir.Contains("C:\")) {
         $currentDir = $currentDir.Replace("C:\","☢️\")
     }
-    elseif ($currentDir.Contains("temp")) {
-        $currentDir = $currentDir.Replace("temp"," ")
+    if((Get-Location).Path.Contains("temp")){ # If the current directory is temp and the home directory
+        if((Get-Location).Path.Contains($HOME)){
+            $currentDir = "🏠\ "
+        }
+        else{
+            $currentDir = "📍\ "
+        }
     }
-	#-------- TA Suite Status --------#
+    # If the current directory is a work directory (VT, VT.prj)
     if($currentDir.Contains("work\ta") -or $currentDir.Contains("work") -or $currentDir.ToLower().Contains("vt.prj.")){
         $tmp=$false
         $lct = $(Get-Location).Path
@@ -63,9 +68,14 @@ function prompt {
             $tmp=$true
         }
         $suite_name=$(((Get-Location).Path).Split('\').where({$_ -like '*vt.prj*'}))
-        $name_part = $suite_name.ToLower().Split('vt.prj.')[1].Split('.')
-        $suite_name = $name_part[1] #-join "." 
-        $suite_child=$((Get-Location).Path).Split('vt.prj.ford.foh02.sys_test')[1]
+        if ($suite_name) {
+            $name_part = $suite_name.ToLower().Split('vt.prj.')[1].Split('.')
+            $suite_name = $name_part[1] #-join "."
+        }
+        $suite_child = ""
+        if ((Get-Location).Path.Contains('vt.prj.ford.foh02.sys_test')) {
+            $suite_child=$((Get-Location).Path).Split('vt.prj.ford.foh02.sys_test')[1]
+        }
         $ta="${BLUE}[TA||$suite_name]${MAGENTA}"
         if ($tmp) {
             $currentDir = "$ta $($suite_child)"
@@ -74,25 +84,21 @@ function prompt {
             $currentDir = "$ta$($suite_child)"
         }
     }
-	#----- Git Branch Status -------#
-	if ((Test-Path .git) -or (git rev-parse --abbrev-ref HEAD) ) {
-		Write-Host ("" + $currentDir + "\\") -NoNewLine `
-		-ForegroundColor 13
+    # Print the current directories in the terminal.
+    if ((Test-Path .git) -or (git rev-parse --abbrev-ref HEAD) ) {
+        # If the current directory has a git repository.
+        Write-Host ("" + $currentDir + "\\") -NoNewLine ` -ForegroundColor 13
         Write-BranchName
-		Write-Host ("🛠️") -NoNewLine `
-		-ForegroundColor 10
-			return " " 
+        Write-Host ("🛠️") -NoNewLine ` -ForegroundColor 10
+        return " "
+    }else{
+        Write-Host ("" + $currentDir+"\\") -NoNewLine ` -ForegroundColor 13
+        Write-BranchName
+        Write-Host ("-->") -NoNewLine ` -ForegroundColor 10
+        return " "
     }
-	else
-	{
-		Write-Host ("" + $currentDir+"\\") -NoNewLine `
-		-ForegroundColor 13
-		Write-BranchName
-		Write-Host ("-->") -NoNewLine `
-		-ForegroundColor 10
-			return " "
-	}
 }
+# This function writes the special characters of the current terminal used. 
 function Invoke-Starship{
   $loc = $executionContext.SessionState.Path.CurrentLocation;
   $prompt = "$([char]27)]9;12$([char]7)"
