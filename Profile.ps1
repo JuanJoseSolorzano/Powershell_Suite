@@ -20,8 +20,8 @@ $MAGENTA = "`e[1;38;5;13m"
 $CYAN = "`e[36m"
 $WHITE = "`e[37m"
 Clear-Host # clear the console.1 
-#Importing PS1 Modules ------#
-$exe_path = Get-Location
+# Import the necessary modules.
+$exe_path = Get-Location # get the current directory.
 Set-Location $HOME
 $modules_path = $HOME + '\\.powershellsuite\\powershell-master\\lib\\{0}.psm1'
 Import-Module -Name ($modules_path -f "GitComCom") -DisableNameChecking
@@ -32,7 +32,7 @@ Import-Module Terminal-Icons
 $module_name = ($HOME + "\{0}.psm1" -f ".decode")
 $module_exists = [System.IO.File]::Exists($module_name)
 if($module_exists){Import-Module -Name $module_name -DisableNameChecking}
-Set-Location $exe_path
+Set-Location $exe_path # return to the current directory.
 ## Shows the directories options.
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 Set-PSReadLineKeyHandler -Key Shift+Tab -Function MenuComplete
@@ -50,7 +50,7 @@ function prompt{
         $currentDir = $currentDir.Replace("D:\","📍\")
     }
     elseif($currentDir.Contains("C:\")) {
-        $currentDir = $currentDir.Replace("C:\","☢️\")
+        $currentDir = $currentDir.Replace("C:\","\🐧")
     }
     if((Get-Location).Path.Contains("temp")){ # If the current directory is temp and the home directory
         if((Get-Location).Path.Contains($HOME)){
@@ -61,7 +61,7 @@ function prompt{
         }
     }
     # If the current directory is a work directory (VT, VT.prj)
-    if($currentDir.Contains("work\ta") -or $currentDir.Contains("work") -or $currentDir.ToLower().Contains("vt.prj.")){
+    if((Get-Location).Path.ToLower().Contains("vt.prj.")){
         $tmp=$false
         $lct = $(Get-Location).Path
         if($lct.Contains("temp")){
@@ -89,7 +89,7 @@ function prompt{
         # If the current directory has a git repository.
         Write-Host ("" + $currentDir + "\\") -NoNewLine ` -ForegroundColor 13
         Write-BranchName
-        Write-Host ("🛠️") -NoNewLine ` -ForegroundColor 10
+        Write-Host ("📝🔧") -NoNewLine ` -ForegroundColor 10
         return " "
     }else{
         Write-Host ("" + $currentDir+"\\") -NoNewLine ` -ForegroundColor 13
