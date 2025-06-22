@@ -9,6 +9,8 @@ This repository contains a set of PowerShell scripts and modules designed to enh
 
 ## Installation
 
+Testing to upload releases.
+
 ### Step 1: Clone the Repository
 Clone this repository into your "Documents" folder:
 ```sh
