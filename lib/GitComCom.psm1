@@ -12,7 +12,7 @@
 #------ Importing PS1 Modules ------#
 $exe_path = Get-Location
 Set-Location $HOME
-$modules_path = $HOME + '\\.powershellsuite\\powershell-master\\lib\\{0}.psm1'
+$modules_path = 'C:\LegacyApp\Powershell_Suite\lib\{0}.psm1'
 Import-Module -Name ($modules_path -f "Helpers") -DisableNameChecking
 Set-Location $exe_path
 #--------- MAIN FUNCTION <prompt> -----------#

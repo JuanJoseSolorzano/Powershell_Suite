@@ -23,7 +23,7 @@ Clear-Host # clear the console.
 # Import the necessary modules.
 $exe_path = Get-Location # get the current directory.
 Set-Location $HOME
-$modules_path = $HOME + '\\.powershellsuite\\powershell-master\\lib\\{0}.psm1'
+$modules_path = 'C:\LegacyApp\Powershell_Suite\lib\{0}.psm1'
 Import-Module -Name ($modules_path -f "GitComCom") -DisableNameChecking
 Import-Module -Name ($modules_path -f "Helpers") -DisableNameChecking
 Import-Module -Name ($modules_path -f "Remote") -DisableNameChecking
