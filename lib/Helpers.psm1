@@ -6,8 +6,8 @@
 	There are many commands that you can use with the powershell profile.
 .NOTES
     File Name      : GitComCom.psm1
-    Author         : Solorzano, Juan Jose (uiv06924)
-    Prerequisite   : PowerShell V1
+    Author         : Solorzano, Juan Jose
+    Prerequisite   : PowerShell V 1.0
 #>
 
 # Define ANSI escape codes for colors
@@ -438,13 +438,18 @@ function del-pyc {
 }
 
 function bat{
-  param([string]$file,[string]$l)
-  if($l){
-      C:/LegacyApp/Python39/python.exe $home/PowerShell/lib/bat.py $file $l
-  }
-  else{
-      C:/LegacyApp/Python39/python.exe $home/PowerShell/lib/bat.py $file
-  }
+	param([string]$file,[string]$l)
+	$script_py = $(Get-ChildItem -Path "." -Recurse -Filter "bat.py").FullName	
+	if(-not $file_path){
+		Write-Host "[!] bat.py not found in the current directory."
+		return
+	}
+  	if($l){
+  	    C:/LegacyApp/Python39/python.exe $file $script_py $l
+  	}
+  	else{
+  	    C:/LegacyApp/Python39/python.exe $script_py $file
+  	}
 }
 
 function rec2json {

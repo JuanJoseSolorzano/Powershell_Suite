@@ -7,7 +7,7 @@
 .NOTES
     File Name      : GitComCom.psm1
     Author         : Solorzano, Juan Jose (uiv06924)
-    Prerequisite   : PowerShell V1
+    Prerequisite   : PowerShell V 1.0
 #>
 #------ Importing PS1 Modules ------#
 $exe_path = Get-Location
