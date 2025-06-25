@@ -25,7 +25,6 @@ $exe_path = Get-Location # get the current directory.
 $modules_path = 'C:\LegacyApp\Powershell_Suite\lib\{0}.psm1'
 Import-Module -Name ($modules_path -f "GitComCom") -DisableNameChecking
 Import-Module -Name ($modules_path -f "Helpers") -DisableNameChecking
-Import-Module -Name ($modules_path -f "Remote") -DisableNameChecking
 Import-Module -Name ($modules_path -f "vs-suite") -DisableNameChecking
 Import-Module Terminal-Icons
 $module_name = ($HOME + "\{0}.psm1" -f ".decode")
