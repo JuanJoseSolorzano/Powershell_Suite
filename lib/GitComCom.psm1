@@ -172,39 +172,38 @@ function Repo($repo) {
 		$None=$true
 	}
 	if(-not $None){
-	    if($repo -eq "G80")
+	    if($repo -eq "d0"){
+	        return 
+	    }
+	    elseif($repo -eq "dd") 
 	    {
-	        return 'https://github.vitesco.io/EnDS-Test-Automation/VT.PRJ.GM.G80.CVR.git'
+	        return 
 	    }
-	    elseif($repo -eq "G70") 
+	    elseif($repo -eq "F") 
 	    {
-	        return 'https://github.vitesco.io/EnDS-Test-Automation/VT.PRJ.GM.G70.CVR.git'
+	        return 
 	    }
-	    elseif($repo -eq "FC1") 
+	    elseif($repo -eq "l")
 	    {
-	        return 'https://github.vitesco.io/EnDS-Test-Automation/VT.PRJ.FORD.FC1.REGR_TEST.git'
+	        return 
 	    }
-	    elseif($repo -eq "FB0")
-	    {
-	        return 'https://github.vitesco.io/EnDS-Test-Automation/VT.PRJ.FORD.FB0.REGR_TEST.git'
+	    elseif ($repo -eq "d"){
+	        return 
 	    }
-	    elseif ($repo -eq "FB1"){
-	        return 'https://gitlab-ec-na.aws1583.vitesco.io/ec/se/aet/tas/ford/fofb0_ta_suite.git'
-	    }
-		elseif($repo -eq "E42A"){
-			return 'https://github.vitesco.io/EnDS-Test-Automation/VT.PRJ.GM.G55.FAST.git'
+		elseif($repo -eq "ck"){
+			return 
 		}
-		elseif($repo -eq "CONTEST"){
-			return 'https://github.vitesco.io/EnDS-Test-Automation/VT.GEN.TOOL.CONTEST.git'
+		elseif($repo -eq "c"){
+			return 
 		}
-		elseif($repo -eq "FC1_"){
-			return 'https://github.vitesco.io/uiv06924/fo_fc1_ta_suite.git'
+		elseif($repo -eq "b"){
+			return 
 		}
-		elseif($repo -eq "H02") {
-			return 'https://github.vitesco.io/EnDS-Test-Automation/vt.prj.ford.foh02.sys_test.git'
+		elseif($repo -eq "a") {
+			return 
 		}
 		elseif($repo -eq "myrecorder"){
-			return 'https://github.vitesco.io/uiv06924/MyRecorder.git'
+			return 
 		}
 	    else{echo "Repository <$repo> don't found !!!!!!!!!"}
 	}
