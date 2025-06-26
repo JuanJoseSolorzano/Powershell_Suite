@@ -27,7 +27,7 @@ function Get-CpuUsage {
   param([switch]$showProcess)
   $usage=[math]::Round((Get-Counter '\Processor(_Total)\% Processor Time').CounterSamples.CookedValue,2)
   $mem = Get-CimInstance Win32_OperatingSystem
-$memory = [math]::Round((($mem.TotalVisibleMemorySize - $mem.FreePhysicalMemory) / $mem.TotalVisibleMemorySize) * 100, 2)
+	$memory = [math]::Round((($mem.TotalVisibleMemorySize - $mem.FreePhysicalMemory) / $mem.TotalVisibleMemorySize) * 100, 2)
   Write-Host "======================================================="
   Write-Host "          -       Cumputer Usage         -"
   Write-Host "======================================================="
