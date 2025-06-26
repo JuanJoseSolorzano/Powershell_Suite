@@ -19,21 +19,20 @@ $BLUE = "`e[34m"
 $MAGENTA = "`e[1;38;5;13m"
 $CYAN = "`e[36m"
 $WHITE = "`e[37m"
+$SUITE_PATH = "C:\\LegacyApp\\Powershell_Suite" # Path to the PowerShell Suite directory.
+
 Clear-Host # clear the console.
 $exe_path = Get-Location # get the current directory.
 # Import the necessary modules.
-$modules_path = 'C:\LegacyApp\Powershell_Suite\lib\{0}.psm1'
+$modules_path = "$SUITE_PATH\lib\{0}.psm1"
 Import-Module -Name ($modules_path -f "GitComCom") -DisableNameChecking
 Import-Module -Name ($modules_path -f "Helpers") -DisableNameChecking
 Import-Module -Name ($modules_path -f "vs-suite") -DisableNameChecking
 Import-Module Terminal-Icons
-$module_name = ($HOME + "\{0}.psm1" -f ".decode")
-$module_exists = [System.IO.File]::Exists($module_name)
-if($module_exists){Import-Module -Name $module_name -DisableNameChecking}
 # Check if the internal modules directory exists and import them.
-$hasContent = $(Get-ChildItem -Path "C:\LegacyApp\Powershell_Suite\Modules\Internal" -File)
+$hasContent = $(Get-ChildItem -Path "$SUITE_PATH\Modules\Internal" -File)
 if($hasContent){
-    $internal_modules = Get-ChildItem -Path 'C:\LegacyApp\Powershell_Suite\Modules\Internal' -Filter "*.psm1" -Recurse | Where-Object { $_.PSIsContainer -eq $false }
+    $internal_modules = Get-ChildItem -Path "$SUITE_PATH\Modules\Internal" -Filter "*.psm1" -Recurse | Where-Object { $_.PSIsContainer -eq $false }
     foreach ($module in $internal_modules) {
         Import-Module -Name $module.FullName -DisableNameChecking
     }

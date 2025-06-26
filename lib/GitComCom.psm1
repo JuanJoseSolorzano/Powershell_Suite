@@ -1,4 +1,4 @@
-#REQUIRES -Version 1.0
+#REQUIRES -Version 7.0
 <#
 .SYNOPSIS
 	GitComCom is a module created to facilte the git commands in powershell.
@@ -7,15 +7,14 @@
 .NOTES
     File Name      : GitComCom.psm1
     Author         : Solorzano, Juan Jose (uiv06924)
-    Prerequisite   : PowerShell V 1.0
+    Prerequisite   : PowerShell V 7.0
 #>
-#------ Importing PS1 Modules ------#
 $exe_path = Get-Location
 Set-Location $HOME
 $modules_path = 'C:\LegacyApp\Powershell_Suite\lib\{0}.psm1'
 Import-Module -Name ($modules_path -f "Helpers") -DisableNameChecking
 Set-Location $exe_path
-#--------- MAIN FUNCTION <prompt> -----------#
+
 function Write-BranchName {
     $marks = "<{}>"
 
