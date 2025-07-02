@@ -20,19 +20,25 @@ $BLUE = "`e[34m"
 $MAGENTA = "`e[1;38;5;13m"
 $CYAN = "`e[36m"
 $WHITE = "`e[37m"
-Clear-Host # clear the console.
+$SUITE_PATH = "C:\LegacyApp\Powershell_Suite" # Path to the PowerShell Suite directory.
+$INTERNAL_MODULES = @("GitComCom.psm1","Helpers.psm1","vs-suite.psm1")
+
+# Initialize the PowerShell profile.
 $exe_path = Get-Location # get the current directory.
+Clear-Host # clear the console.
 # Import the necessary modules.
-$modules_path = 'C:\LegacyApp\Powershell_Suite\lib\{0}.psm1'
-echo "${GREEN}Loading PowerShell Suite modules... $exe_path -- ${RESET}"
-pause
-Import-Module -Name ($modules_path -f "GitComCom") -DisableNameChecking
-Import-Module -Name ($modules_path -f "Helpers") -DisableNameChecking
-Import-Module -Name ($modules_path -f "vs-suite") -DisableNameChecking
+foreach($module in $INTERNAL_MODULES){
+    $module_path = "$SUITE_PATH\lib\$module"
+    if (Test-Path -Path $module_path) {
+        Import-Module -Name $module_path -DisableNameChecking
+    } else {
+        Write-Host "Module $module not found in $SUITE_PATH\lib" -ForegroundColor Red
+    }
+}
+# Global module in powershell/Modules path.
+Import-Module -Name "$SUITE_PATH\Modules\git-completion\1.1.0\posh-git.psd1" -DisableNameChecking
+Import-Module -Name "$SUITE_PATH\Modules\git-completion\1.1.0\posh-git.psm1" -DisableNameChecking
 Import-Module Terminal-Icons
-$module_name = ($HOME + "\{0}.psm1" -f ".decode")
-$module_exists = [System.IO.File]::Exists($module_name)
-if($module_exists){Import-Module -Name $module_name -DisableNameChecking}
 # Check if the internal modules directory exists and import them.
 $hasContent = $(Get-ChildItem -Path "C:\LegacyApp\Powershell_Suite\Modules\Internal" -File)
 if($hasContent){
