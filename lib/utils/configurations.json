@@ -1,0 +1,7 @@
+{   
+    "GitRepos":{
+        "pwshInstaller": "Powershell_Installer",
+        "pwshSuite":"Powershell_Suite",
+        "jenkinsPipeline":"jenkinspipeline"
+    }
+}

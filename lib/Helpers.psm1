@@ -20,30 +20,40 @@ $BLUE = "`e[34m"
 $MAGENTA = "`e[38;5;13m"
 $CYAN = "`e[36m"
 $WHITE = "`e[37m"
+# Constants 
 $HELP = "${YELLOW}[?] Usage:`n    ${GREEN}PS> {0}${MAGENTA} {1}${RESET}"
 $POWERSHELL = "\PowerShell\"
 
+<#
+.SYNOPSIS
+	This function returns the CPU current usage.
+#>
 function Get-CpuUsage {
-  param([switch]$showProcess)
-  $usage=[math]::Round((Get-Counter '\Processor(_Total)\% Processor Time').CounterSamples.CookedValue,2)
-  $mem = Get-CimInstance Win32_OperatingSystem
-	$memory = [math]::Round((($mem.TotalVisibleMemorySize - $mem.FreePhysicalMemory) / $mem.TotalVisibleMemorySize) * 100, 2)
-  Write-Host "======================================================="
-  Write-Host "          -       Cumputer Usage         -"
-  Write-Host "======================================================="
-  Write-Host "CPU: $usage%"
-  Write-Host "Memory: $memory%"
-  if($showProcess){
-    Get-CimInstance Win32_Process | 
-    Select-Object Name, @{Name="MemoryUsageMB"; Expression={[math]::Round($_.WorkingSetSize / 1MB, 2)}} |
-    Sort-Object MemoryUsageMB -Descending | Select-Object -First 15 Name, MemoryUsageMB
-  }
+	param([switch]$showProcess)
+  	$usage=[math]::Round((Get-Counter '\Processor(_Total)\% Processor Time').CounterSamples.CookedValue,2)
+  	$mem = Get-CimInstance Win32_OperatingSystem
+  	$memory = [math]::Round((($mem.TotalVisibleMemorySize - $mem.FreePhysicalMemory) / $mem.TotalVisibleMemorySize) * 100, 2)
+  	Write-Host "======================================================="
+  	Write-Host "          -       Cumputer Usage         -"
+  	Write-Host "======================================================="
+  	Write-Host "CPU: $usage%"
+  	Write-Host "Memory: $memory%"
+  	if($showProcess){
+		Get-CimInstance Win32_Process | 
+		Select-Object Name, @{Name="MemoryUsageMB"; Expression={[math]::Round($_.WorkingSetSize / 1MB, 2)}} |
+		Sort-Object MemoryUsageMB -Descending | Select-Object -First 15 Name, MemoryUsageMB
+  	}
 }
 
-function RmProc {
-	param([string]$name)
-	if(-not $name){
-		Write-Host "[?] Usage:`n`t>> rmProc [process name]"
+<#
+.SYNOPSIS
+	This function removes a process by its name. This function avoids the to use the Kill -ProcessName cmdlet.
+#>
+function Del-Process {
+	param([Parameter(Mandatory=$true)][string]$name,[switch]$h)
+
+	if($h){
+		Write-Host "$($HELP -f 'Del-Process','[-name <process name>] [-h <help>]')"
 		return
 	}
 	if($name.Contains('.')){
@@ -494,10 +504,12 @@ function del-recurse($item){
 function rm-readonly{
     Set-ItemProperty -Path "." -Name Attributes -Value ((Get-Item ".").Attributes -band -not [System.IO.FileAttributes]::ReadOnly)
 }
+
 function rc {
 	#!/usr/bin/env pwsh
 	echo "`e[6 q"
 }
+
 function bash {
     $curr_location = get-location
     $curr_location = $curr_location.path
@@ -534,6 +546,7 @@ function Google($page) {
 function Mlink ($target, $link){
 	New-Item -Force -Path $link -ItemType SymbolicLink -Value $target
 }
+
 function b($n){
 
 	$back_patern = '../'
@@ -586,7 +599,7 @@ function edit-globals {
 function prj{
 	[CmdletBinding()]
     param([string]$name,[string]$opt,[switch]$go)
-	$projects = "d:/projects"
+	$projects = "d:/GitHub"
     function showDirOptions($directories,$opt) {
         Write-Host "${YELLOW}[!] ${CYAN}The project name given has multiple locations."
             $idx = 0
@@ -611,10 +624,10 @@ function prj{
             }
     }
     if($name -eq "a"){
-		set-location $l30_path
+		set-location .
 		return
 	}else{
-        Write-Host "$($HELP -f 'prj','[-name<default>] [-L30<opt>] [-L40<opt>]')"
+        Write-Host "$($HELP -f 'prj','[-name<default>]')"
     }
 }
 
@@ -808,6 +821,7 @@ function cdll {
 	gcc -shared -o $dll_name $cfile	
 	echo "[+] $dll_name created"
 }
+
 function Del-line($filePath,$stringToFind){
 	# Specify the string you want to insert with a line break
 	$insertedString = ""  # Use `r`n for a line break
