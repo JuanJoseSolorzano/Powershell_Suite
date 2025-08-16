@@ -349,3 +349,28 @@ function Git-Push{
 		Write-Output "push command needs to have a commit!!!"
 	}
 }
+
+function get-repos{
+    [CmdletBinding()]
+    param([string]$pattern)
+    $username = "JuanJoseSolorzano"
+    $page = 1
+    $allRepos = @()
+    while($true){
+        $url = write-output $("https://github.com/$username`?tab=repositories&page=$page")
+        $html = curl.exe -s $url
+        $repos = Write-Output $html | Select-String "codeRepository" | 
+            ForEach-Object {$_ -replace "`" itemprop=`"name codeRepository`" >",""} | 
+            ForEach-Object {$_ -replace "<a href=`"",""} | 
+            ForEach-Object {$_.Trim()} | 
+            ForEach-Object {"https://github.com$_.git"}
+        if ($repos.Count -eq 0) { break }
+        $allRepos += $repos
+        $page++
+    }
+    if($pattern){
+        $allRepos | Where-Object {$_ -like "*$pattern*"}
+    }else{
+        $allRepos
+    }
+}
